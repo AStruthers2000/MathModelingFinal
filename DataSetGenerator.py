@@ -1,6 +1,8 @@
 import yfinance as yf
 import datetime as dt
 import csv
+import os
+import shutil
 
 class DataGenerator:
     def ConvertDayToNumber(self, date):
@@ -16,7 +18,8 @@ class DataGenerator:
 
         hist = stock.history(period=period)
 
-        with open("{0}-Data.csv".format(ticker), 'w', newline='') as file:
+        filename = "{0}-Data.csv".format(ticker)
+        with open(filename, 'w', newline='') as file:
             writer = csv.writer(file, delimiter=',')
             
             startDate = -1
@@ -25,7 +28,15 @@ class DataGenerator:
                     startDate = self.ConvertDayToNumber(index)
                     writer.writerow(["Days since {0}".format(index), "Price at Closing (USD)"])
                 writer.writerow([self.DaysSinceBeginning(startDate, self.ConvertDayToNumber(index)), row["Close"]])
+
+        cwd = os.path.abspath(os.getcwd())
+        path = cwd + "/Data/"
+        isExist = os.path.exists(path)
+        if not isExist:
+            os.makedirs(path)
+        shutil.move('{0}'.format(filename), path + '{0}'.format(filename))
+        
             
 if __name__ == "__main__":
     generator = DataGenerator()
-    generator.GenerateData("^GSPC", "max")
+    generator.GenerateData("AAPL", "max")
